@@ -27,8 +27,15 @@ POST /images/
         "label" : null,
         "detectObjects" : true
     }
+POST /images/
+    {
+        "image" : {
+            "source" : "image-url"
+        },
+        "label" : null,
+        "detectObjects" : true
+    }
 
-POST with imageURI is not functional due to time constraints, see note on Google not respecting their own APIs
 
 # Difficulties and Decisions
 
@@ -234,4 +241,4 @@ But then I remembered to change the port too
 
 After implementing the google APIs, testing revealed that they will throw an error if the user attempts to submit an image via URL, regardless of the API stating that it is supported. There is no time to investigate how to turn this on, as I suspect there are controls disabling this.
 
-A simple fix is to download the image locally, base64 it, and send the request via content. However, I am stretching time too thin, and have opted to stop here.
+A simple fix is to download the image locally, base64 it, and send the request via content. We did this real quick after submitting because it was bothering us.

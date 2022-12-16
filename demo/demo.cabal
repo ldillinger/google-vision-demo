@@ -45,6 +45,7 @@ library
         directory,
         filepath,
         http-client,
+        http-client-tls,
         monad-logger,
         mtl,
         -- mysql-simple,

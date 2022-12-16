@@ -22,9 +22,18 @@ import Data.List (nub)
 
 import Data.Proxy (Proxy)
 
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as ByteString
+import qualified Data.ByteString.Lazy as ByteString (toStrict)
+
 import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.Encoding as Text
+
+import Data.ByteString.Base64 (encodeBase64)
+
+import qualified Network.HTTP.Client as HTTP
+import qualified Network.HTTP.Client.TLS as HTTP (newTlsManager)
 
 import Data.Time
 
@@ -173,7 +182,7 @@ type SubmitImageEndpoint
     = "images" :> ReqBody '[JSON] SubmitImageRequest :> Post '[JSON] SubmitImageResponse
 
 submitImageHandler :: SubmitImageRequest -> ServiceM SubmitImageResponse    
-submitImageHandler req = resp where
+submitImageHandler req = convertResp where
     source        = submitImageRequestImageSource req
     mlabel        = submitImageRequestImageLabel req
     -- NOTE: This hashing function should be extracted
@@ -184,6 +193,18 @@ submitImageHandler req = resp where
     detectObjects = submitImageRequestDetectObjects req
     mkImage = ImageMetadata imageId label detectObjects . ImageObjects
     image = mkImage []
+    -- NOTE: This converts a IMAGESOURCE request to a IMAGECONTENT request
+    --  by downloading the image and converting it to base64
+    convertResp = case source of
+        ImageSource imageUri -> do
+            manager <- liftIO $ HTTP.newTlsManager
+            request <- liftIO $ HTTP.parseRequest $ Text.unpack imageUri
+            response <- liftIO $ HTTP.httpLbs request manager
+            submitImageHandler $ req
+                { submitImageRequestImageSource = ImageContent
+                    (encodeBase64 . ByteString.toStrict $ HTTP.responseBody response)
+                }
+        ImageContent _ -> resp
     resp = do
         -- Check to see if its already in the db
         existing <- liftIO . runDB $ selectFirst [ImageMetadataImageId ==. imageId] [LimitTo 1]
