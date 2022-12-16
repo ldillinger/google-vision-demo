@@ -1,0 +1,84 @@
+cabal-version:      3.0
+name:               demo
+version:            0.0.1
+license:            NONE
+author:             Leo
+maintainer:         leo@apotheca.io
+build-type:         Simple
+extra-source-files: README.md
+
+data-dir:
+    data
+data-files:
+    clownfish.jpg
+
+library
+    exposed-modules:
+        Demo.Image
+        Demo.Server
+        Demo.Service
+    other-modules:
+        Google.Cloud.Vision
+        Paths_demo
+    default-extensions:
+        DataKinds
+        DeriveGeneric
+        DerivingStrategies
+        FlexibleContexts
+        FlexibleInstances
+        GeneralizedNewtypeDeriving
+        InstanceSigs
+        MultiParamTypeClasses
+        NoImplicitPrelude
+        OverloadedStrings
+        RankNTypes
+        ScopedTypeVariables
+        TypeOperators
+    build-depends:
+        base >= 4 && < 5,
+        aeson,
+        base64,
+        bytestring,
+        conduit,
+        containers,
+        cryptonite,
+        directory,
+        filepath,
+        http-client,
+        monad-logger,
+        mtl,
+        -- mysql-simple,
+        persistent,
+        persistent-sqlite,
+        servant,
+        servant-client,
+        servant-server,
+        time,
+        transformers,
+        text,
+        unliftio-core
+    hs-source-dirs:   src
+    default-language: Haskell2010
+
+executable demod
+    hs-source-dirs:
+        exe
+    main-is:
+        Main.hs
+    other-modules:
+        Paths_demo
+    default-extensions:
+        NoImplicitPrelude
+        OverloadedStrings
+    build-depends:
+        base >=4 && <5,
+        demo,
+        http-client,
+        http-client-tls,
+        servant-client,
+        text,
+        wai,
+        wai-logger,
+        warp
+    ghc-options:       -threaded -O -rtsopts -with-rtsopts=-N
+    default-language:    Haskell2010
